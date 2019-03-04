@@ -41,14 +41,6 @@ static Tcl_ObjectMetadataType pdc_window_meta =
 	NULL,
 };
 
-enum pdc_option_t
-{
-	PDC_OPTION_CBREAK,
-	PDC_OPTION_ECHO,
-	PDC_OPTION_NL,
-	PDC_OPTION_TRACE,
-};
-
 static int get_vector2_from_obj(
 	Tcl_Interp* interp,
 	Tcl_Obj* const obj,
@@ -241,51 +233,43 @@ static int pdc_opt(
 		return TCL_ERROR;
 	}
 
-	Tcl_Obj* ret;
 	int value;
-	const char* option_str = Tcl_GetString(objv[1]);
-	enum pdc_option_t option;
-	if (!strcmp(option_str, "cbreak"))
-		option = PDC_OPTION_CBREAK;
-	else if (!strcmp(option_str, "echo"))
-		option = PDC_OPTION_ECHO;
-	else if (!strcmp(option_str, "nl"))
-		option = PDC_OPTION_NL;
-	else if (!strcmp(option_str, "trace"))
-		option = PDC_OPTION_TRACE;
-	else
-	{
-		ret = Tcl_Format(interp, "unknown option %s: must be cbreak, echo, nl, or trace", 1, objv + 1);
-		Tcl_SetObjResult(interp, ret);
-		return TCL_ERROR;
-	}
 	if (Tcl_GetBooleanFromObj(interp, objv[2], &value) == TCL_ERROR)
 		return TCL_ERROR;
-	switch (option)
+
+	const char* option_str = Tcl_GetString(objv[1]);
+	if (!strcmp(option_str, "cbreak"))
 	{
-		case PDC_OPTION_CBREAK:
-			if (value)
-				cbreak();
-			else
-				nocbreak();
-			break;
-		case PDC_OPTION_ECHO:
-			if (value)
-				echo();
-			else
-				noecho();
-			break;
-		case PDC_OPTION_NL:
-			if (value)
-				nl();
-			else
-				nonl();
-			break;
-		case PDC_OPTION_TRACE:
-			if (value)
-				traceon();
-			else
-				traceoff();
+		if (value)
+			ASSERT(cbreak() == OK);
+		else
+			ASSERT(nocbreak() == OK);
+	}
+	else if (!strcmp(option_str, "echo"))
+	{
+		if (value)
+			ASSERT(echo() == OK);
+		else
+			ASSERT(noecho() == OK);
+	}
+	else if (!strcmp(option_str, "nl"))
+	{
+		if (value)
+			ASSERT(nl() == OK);
+		else
+			ASSERT(nonl() == OK);
+	}
+	else if (!strcmp(option_str, "trace"))
+	{
+		if (value)
+			traceon();
+		else
+			traceoff();
+	}
+	else
+	{
+		Tcl_SetObjResult(interp, Tcl_Format(interp, "unknown option %s: must be cbreak, echo, nl, or trace", 1, objv + 1));
+		return TCL_ERROR;
 	}
 	return TCL_OK;
 }
