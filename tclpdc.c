@@ -18,15 +18,18 @@
 #define ASSERT(cond) do if (!(cond)) printf("Invalid assertion at " __FILE__ ":%d: " #cond "\n", __LINE__); while (0)
 #define ASSERT_TCLOK(expr) do if ((expr) == TCL_ERROR) printf("TCL_ERROR at " __FILE__ ":%d: " #expr ": %s\n", __LINE__, Tcl_GetStringResult(interp)); while (0)
 
-#define TCL_METHODTYPE(CLASS, METHOD) \
-static Tcl_MethodType pdc_##CLASS##_##METHOD##_type = \
+#define TCL_METHODTYPE(CLASS, METHOD) pdc_##CLASS##_##METHOD##_type
+#define TCL_METHOD(CLASS, METHOD, ...) \
+static int pdc_##CLASS##_##METHOD(ClientData, Tcl_Interp*, Tcl_ObjectContext, int, Tcl_Obj* const[]); \
+static Tcl_MethodType TCL_METHODTYPE(CLASS, METHOD) = \
 { \
 	TCL_OO_METHOD_VERSION_CURRENT, \
-	"PDCurses method: \"" #METHOD "\"", \
+	"PDCurses " #CLASS " method: \"" #METHOD "\"", \
 	pdc_##CLASS##_##METHOD, \
 	NULL, \
 	NULL, \
-}
+}; \
+static int pdc_##CLASS##_##METHOD(__VA_ARGS__)
 
 static void pure_void(UNUSED ClientData window)
 {
@@ -66,7 +69,7 @@ static int get_vector2_from_obj(
 	return TCL_OK;
 }
 
-static int pdc_window_add(
+TCL_METHOD(window, add,
 	UNUSED ClientData clientData,
 	Tcl_Interp* interp,
 	Tcl_ObjectContext context,
@@ -101,9 +104,8 @@ static int pdc_window_add(
 
 	return TCL_OK;
 }
-TCL_METHODTYPE(window, add);
 
-static int pdc_window_getch(
+TCL_METHOD(window, getch,
 	UNUSED ClientData clientData,
 	Tcl_Interp* interp,
 	Tcl_ObjectContext context,
@@ -140,9 +142,8 @@ static int pdc_window_getch(
 	}
 	return TCL_OK;
 }
-TCL_METHODTYPE(window, getch);
 
-static int pdc_window_opt(
+TCL_METHOD(window, opt,
 	UNUSED ClientData clientData,
 	Tcl_Interp* interp,
 	Tcl_ObjectContext context,
@@ -219,7 +220,6 @@ static int pdc_window_opt(
 	}
 	return TCL_OK;
 }
-TCL_METHODTYPE(window, opt);
 
 static int pdc_opt(
 	UNUSED ClientData clientData,
@@ -301,9 +301,9 @@ PUBLIC int Tclpdc_Init(Tcl_Interp *interp)
 		pdc_window = Tcl_GetObjectAsClass(pdc_window_object);
 	}
 
-	Tcl_NewMethod(interp, pdc_window, Tcl_NewStringObj("add", -1), 1, &pdc_window_add_type, NULL);
-	Tcl_NewMethod(interp, pdc_window, Tcl_NewStringObj("getch", -1), 1, &pdc_window_getch_type, NULL);
-	Tcl_NewMethod(interp, pdc_window, Tcl_NewStringObj("opt", -1), 1, &pdc_window_opt_type, NULL);
+	Tcl_NewMethod(interp, pdc_window, Tcl_NewStringObj("add", -1), 1, &TCL_METHODTYPE(window, add), NULL);
+	Tcl_NewMethod(interp, pdc_window, Tcl_NewStringObj("getch", -1), 1, &TCL_METHODTYPE(window, getch), NULL);
+	Tcl_NewMethod(interp, pdc_window, Tcl_NewStringObj("opt", -1), 1, &TCL_METHODTYPE(window, opt), NULL);
 	Tcl_CreateObjCommand(interp, "pdc::opt", pdc_opt, NULL, NULL);
 
 	Tcl_Object pdc_stdscr = Tcl_NewObjectInstance(interp, pdc_window, "pdc::stdscr", NULL, 0, NULL, 0);
