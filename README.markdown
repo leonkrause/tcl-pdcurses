@@ -3,8 +3,10 @@ PDCurses SDL2 Tcl extension
 
 TclOO C extension for PDCurses' SDL2 platform.
 
-Currently only supports `add` (`addch`, `addchstr` & `addstr`), `getch` and some options using `opt`.
-If the default font cannot be found, the `PDC_FONT` environment variable can be used to specify the path of a `.ttf` file.
+Currently only supports `add` (`addch`, `addchstr` & `addstr`), `getch` and some
+options using `opt`.
+The `PDC_FONT` environment variable can be used to specify the path of a
+`.ttf` file, which is useful if the default font is not available.
 
 Building
 --------

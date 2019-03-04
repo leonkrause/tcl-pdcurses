@@ -15,8 +15,8 @@
 #define UNUSED __attribute__ ((unused))
 #endif
 
-#define ASSERT(cond) if (!(cond)) { printf("Invalid assertion at " __FILE__ ":%d: " #cond "\n", __LINE__); }
-#define ASSERT_TCLOK(expr) if ((expr) == TCL_ERROR) { printf("TCL_ERROR at " __FILE__ ":%d: " #expr ": %s\n", __LINE__, Tcl_GetStringResult(interp)); }
+#define ASSERT(cond) do if (!(cond)) printf("Invalid assertion at " __FILE__ ":%d: " #cond "\n", __LINE__); while (0)
+#define ASSERT_TCLOK(expr) do if ((expr) == TCL_ERROR) printf("TCL_ERROR at " __FILE__ ":%d: " #expr ": %s\n", __LINE__, Tcl_GetStringResult(interp)); while (0)
 
 #define TCL_METHODTYPE(CLASS, METHOD) \
 static Tcl_MethodType pdc_##CLASS##_##METHOD##_type = \
@@ -144,7 +144,7 @@ static int pdc_window_getch(
 	}
 	else
 	{
-		ASSERT(getret == ERR)
+		ASSERT(getret == ERR);
 	}
 	return TCL_OK;
 }
@@ -229,7 +229,7 @@ static int pdc_window_opt(
 }
 TCL_METHODTYPE(window, opt);
 
-int pdc_opt(
+static int pdc_opt(
 	UNUSED ClientData clientData,
 	Tcl_Interp* interp,
 	int objc,
