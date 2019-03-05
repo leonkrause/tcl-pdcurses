@@ -19,16 +19,10 @@
 #define ASSERT_TCLOK(expr) do if ((expr) == TCL_ERROR) printf("TCL_ERROR at " __FILE__ ":%d: " #expr ": %s\n", __LINE__, Tcl_GetStringResult(interp)); while (0)
 
 #define TCL_METHODTYPE(CLASS, METHOD) pdc_##CLASS##_##METHOD##_type
-#define TCL_METHOD(CLASS, METHOD, ...) \
+#define TCL_METHOD_DEF(CLASS, METHOD, ...) \
 static int pdc_##CLASS##_##METHOD(ClientData, Tcl_Interp*, Tcl_ObjectContext, int, Tcl_Obj* const[]); \
 static Tcl_MethodType TCL_METHODTYPE(CLASS, METHOD) = \
-{ \
-	TCL_OO_METHOD_VERSION_CURRENT, \
-	"PDCurses " #CLASS " method: \"" #METHOD "\"", \
-	pdc_##CLASS##_##METHOD, \
-	NULL, \
-	NULL, \
-}; \
+	{ TCL_OO_METHOD_VERSION_CURRENT, "PDCurses " #CLASS " method: \"" #METHOD "\"", pdc_##CLASS##_##METHOD, NULL, NULL, }; \
 static int pdc_##CLASS##_##METHOD(__VA_ARGS__)
 
 static void pure_void(UNUSED ClientData window)
@@ -75,7 +69,7 @@ static int get_vector2_from_obj(
 	return TCL_OK;
 }
 
-TCL_METHOD(window, add,
+TCL_METHOD_DEF(window, add,
 	UNUSED ClientData clientData,
 	Tcl_Interp* interp,
 	Tcl_ObjectContext context,
@@ -111,7 +105,7 @@ TCL_METHOD(window, add,
 	return TCL_OK;
 }
 
-TCL_METHOD(window, getch,
+TCL_METHOD_DEF(window, getch,
 	UNUSED ClientData clientData,
 	Tcl_Interp* interp,
 	Tcl_ObjectContext context,
@@ -149,7 +143,7 @@ TCL_METHOD(window, getch,
 	return TCL_OK;
 }
 
-TCL_METHOD(window, refresh,
+TCL_METHOD_DEF(window, refresh,
 	UNUSED ClientData clientData,
 	Tcl_Interp* interp,
 	Tcl_ObjectContext context,
@@ -185,7 +179,7 @@ TCL_METHOD(window, refresh,
 	return TCL_OK;
 }
 
-TCL_METHOD(window, opt,
+TCL_METHOD_DEF(window, opt,
 	UNUSED ClientData clientData,
 	Tcl_Interp* interp,
 	Tcl_ObjectContext context,
