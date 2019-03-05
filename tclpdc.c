@@ -227,6 +227,36 @@ TCL_METHOD(window, opt,
 	return TCL_OK;
 }
 
+static int pdc_beep(
+	UNUSED ClientData clientData,
+	Tcl_Interp* interp,
+	int objc,
+	Tcl_Obj* const objv[])
+{
+	if (objc != 1)
+	{
+		Tcl_WrongNumArgs(interp, 1, objv, NULL);
+		return TCL_ERROR;
+	}
+	beep();
+	return TCL_OK;
+}
+
+static int pdc_flash(
+	UNUSED ClientData clientData,
+	Tcl_Interp* interp,
+	int objc,
+	Tcl_Obj* const objv[])
+{
+	if (objc != 1)
+	{
+		Tcl_WrongNumArgs(interp, 1, objv, NULL);
+		return TCL_ERROR;
+	}
+	flash();
+	return TCL_OK;
+}
+
 static int pdc_opt(
 	UNUSED ClientData clientData,
 	Tcl_Interp* interp,
@@ -310,6 +340,8 @@ PUBLIC int Tclpdc_Init(Tcl_Interp *interp)
 	Tcl_NewMethod(interp, pdc_window, Tcl_NewStringObj("add", -1), 1, &TCL_METHODTYPE(window, add), NULL);
 	Tcl_NewMethod(interp, pdc_window, Tcl_NewStringObj("getch", -1), 1, &TCL_METHODTYPE(window, getch), NULL);
 	Tcl_NewMethod(interp, pdc_window, Tcl_NewStringObj("opt", -1), 1, &TCL_METHODTYPE(window, opt), NULL);
+	Tcl_CreateObjCommand(interp, "pdc::beep", pdc_beep, NULL, NULL);
+	Tcl_CreateObjCommand(interp, "pdc::flash", pdc_flash, NULL, NULL);
 	Tcl_CreateObjCommand(interp, "pdc::opt", pdc_opt, NULL, NULL);
 
 	Tcl_Object pdc_stdscr = Tcl_NewObjectInstance(interp, pdc_window, "pdc::stdscr", NULL, 0, NULL, 0);
