@@ -149,6 +149,42 @@ TCL_METHOD(window, getch,
 	return TCL_OK;
 }
 
+TCL_METHOD(window, refresh,
+	UNUSED ClientData clientData,
+	Tcl_Interp* interp,
+	Tcl_ObjectContext context,
+	int objc,
+	Tcl_Obj* const objv[])
+{
+	WINDOW* win = Tcl_ObjectGetMetadata(Tcl_ObjectContextObject(context), &pdc_window_meta);
+	bool nout = false;
+
+	int skipped_argc = Tcl_ObjectContextSkippedArgs(context);
+	int argc = objc - skipped_argc;
+	Tcl_Obj* const* argv = objv + skipped_argc;
+
+	if (argc == 1)
+	{
+		if (!Tcl_StringMatch(Tcl_GetString(*argv), "-nout"))
+		{
+			Tcl_SetObjResult(interp, Tcl_Format(interp, "bad option \"%s\": must be -nout", 1, argv));
+			return TCL_ERROR;
+		}
+		nout = true;
+	}
+	else if (argc > 1)
+	{
+		Tcl_WrongNumArgs(interp, skipped_argc, objv, "?-nout?");
+		return TCL_ERROR;
+	}
+
+	if (nout)
+		ASSERT(wnoutrefresh(win) == OK);
+	else
+		ASSERT(wrefresh(win) == OK);
+	return TCL_OK;
+}
+
 TCL_METHOD(window, opt,
 	UNUSED ClientData clientData,
 	Tcl_Interp* interp,
@@ -257,6 +293,21 @@ static int pdc_flash(
 	return TCL_OK;
 }
 
+static int pdc_doupdate(
+	UNUSED ClientData clientData,
+	Tcl_Interp* interp,
+	int objc,
+	Tcl_Obj* const objv[])
+{
+	if (objc != 1)
+	{
+		Tcl_WrongNumArgs(interp, 1, objv, NULL);
+		return TCL_ERROR;
+	}
+	ASSERT(doupdate() == OK);
+	return TCL_OK;
+}
+
 static int pdc_opt(
 	UNUSED ClientData clientData,
 	Tcl_Interp* interp,
@@ -339,9 +390,11 @@ PUBLIC int Tclpdc_Init(Tcl_Interp *interp)
 
 	Tcl_NewMethod(interp, pdc_window, Tcl_NewStringObj("add", -1), 1, &TCL_METHODTYPE(window, add), NULL);
 	Tcl_NewMethod(interp, pdc_window, Tcl_NewStringObj("getch", -1), 1, &TCL_METHODTYPE(window, getch), NULL);
+	Tcl_NewMethod(interp, pdc_window, Tcl_NewStringObj("refresh", -1), 1, &TCL_METHODTYPE(window, refresh), NULL);
 	Tcl_NewMethod(interp, pdc_window, Tcl_NewStringObj("opt", -1), 1, &TCL_METHODTYPE(window, opt), NULL);
 	Tcl_CreateObjCommand(interp, "pdc::beep", pdc_beep, NULL, NULL);
 	Tcl_CreateObjCommand(interp, "pdc::flash", pdc_flash, NULL, NULL);
+	Tcl_CreateObjCommand(interp, "pdc::doupdate", pdc_doupdate, NULL, NULL);
 	Tcl_CreateObjCommand(interp, "pdc::opt", pdc_opt, NULL, NULL);
 
 	Tcl_Object pdc_stdscr = Tcl_NewObjectInstance(interp, pdc_window, "pdc::stdscr", NULL, 0, NULL, 0);
