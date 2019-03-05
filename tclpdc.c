@@ -206,49 +206,49 @@ TCL_METHOD(window, opt,
 	Tcl_Obj* ret;
 	int value;
 	const char* option_str = Tcl_GetString(argv[0]);
-	if (!strcmp(option_str, "keypad"))
+	if (Tcl_StringMatch(option_str, "keypad"))
 	{
 		if (Tcl_GetBooleanFromObj(interp, argv[1], &value) == TCL_ERROR)
 			return TCL_ERROR;
 		ASSERT(keypad(win, value) == OK);
 	}
-	else if (!strcmp(option_str, "delay"))
+	else if (Tcl_StringMatch(option_str, "delay"))
 	{
 		if (Tcl_GetBooleanFromObj(interp, argv[1], &value) == TCL_ERROR)
 			return TCL_ERROR;
 		ASSERT(nodelay(win, !value) == OK);
 	}
-	else if (!strcmp(option_str, "timeout"))
+	else if (Tcl_StringMatch(option_str, "timeout"))
 	{
 		ASSERT_TCLOK(Tcl_GetIntFromObj(interp, argv[1], &value));
 		wtimeout(win, value);
 	}
-	else if (!strcmp(option_str, "immedok"))
+	else if (Tcl_StringMatch(option_str, "immedok"))
 	{
 		if (Tcl_GetBooleanFromObj(interp, argv[1], &value) == TCL_ERROR)
 			return TCL_ERROR;
 		immedok(win, value);
 	}
-	else if (!strcmp(option_str, "leaveok"))
+	else if (Tcl_StringMatch(option_str, "leaveok"))
 	{
 		if (Tcl_GetBooleanFromObj(interp, argv[1], &value) == TCL_ERROR)
 			return TCL_ERROR;
 		ASSERT(leaveok(win, value) == OK);
 	}
-	else if (!strcmp(option_str, "scrreg"))
+	else if (Tcl_StringMatch(option_str, "scrreg"))
 	{
 		int pos[2];
 		if (get_vector2_from_obj(interp, argv[1], pos, "top-margin", "bottom-margin") == TCL_ERROR)
 			return TCL_ERROR;
 		ASSERT(wsetscrreg(win, pos[0], pos[1]) == OK);
 	}
-	else if (!strcmp(option_str, "scrollok"))
+	else if (Tcl_StringMatch(option_str, "scrollok"))
 	{
 		if (Tcl_GetBooleanFromObj(interp, argv[1], &value) == TCL_ERROR)
 			return TCL_ERROR;
 		ASSERT(scrollok(win, value) == OK);
 	}
-	else if (!strcmp(option_str, "syncok"))
+	else if (Tcl_StringMatch(option_str, "syncok"))
 	{
 		if (Tcl_GetBooleanFromObj(interp, argv[1], &value) == TCL_ERROR)
 			return TCL_ERROR;
@@ -325,28 +325,28 @@ static int pdc_opt(
 		return TCL_ERROR;
 
 	const char* option_str = Tcl_GetString(objv[1]);
-	if (!strcmp(option_str, "cbreak"))
+	if (Tcl_StringMatch(option_str, "cbreak"))
 	{
 		if (value)
 			ASSERT(cbreak() == OK);
 		else
 			ASSERT(nocbreak() == OK);
 	}
-	else if (!strcmp(option_str, "echo"))
+	else if (Tcl_StringMatch(option_str, "echo"))
 	{
 		if (value)
 			ASSERT(echo() == OK);
 		else
 			ASSERT(noecho() == OK);
 	}
-	else if (!strcmp(option_str, "nl"))
+	else if (Tcl_StringMatch(option_str, "nl"))
 	{
 		if (value)
 			ASSERT(nl() == OK);
 		else
 			ASSERT(nonl() == OK);
 	}
-	else if (!strcmp(option_str, "trace"))
+	else if (Tcl_StringMatch(option_str, "trace"))
 	{
 		if (value)
 			traceon();
