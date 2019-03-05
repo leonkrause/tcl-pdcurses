@@ -47,7 +47,9 @@ static Tcl_ObjectMetadataType pdc_window_meta =
 static int get_vector2_from_obj(
 	Tcl_Interp* interp,
 	Tcl_Obj* const obj,
-	int vector[2])
+	int vector[2],
+	const char y_name[],
+	const char x_name[])
 {
 	int len;
 	Tcl_Obj** list;
@@ -55,7 +57,11 @@ static int get_vector2_from_obj(
 		return TCL_ERROR;
 	if (len != 2)
 	{
-		Tcl_SetResult(interp, "invalid position: should be \"{y x}\"", TCL_STATIC);
+		if (!y_name)
+			y_name = "y";
+		if (!x_name)
+			x_name = "x";
+		Tcl_SetObjResult(interp, Tcl_ObjPrintf("invalid position: should be \"{%s %s}\"", y_name, x_name));
 		return TCL_ERROR;
 	}
 
@@ -87,7 +93,7 @@ TCL_METHOD(window, add,
 	if (argc == 2)
 	{
 		moving = true;
-		if (get_vector2_from_obj(interp, *argv, position) == TCL_ERROR)
+		if (get_vector2_from_obj(interp, *argv, position, NULL, NULL) == TCL_ERROR)
 			return TCL_ERROR;
 		++argv;
 	}
@@ -196,7 +202,7 @@ TCL_METHOD(window, opt,
 	else if (!strcmp(option_str, "scrreg"))
 	{
 		int pos[2];
-		if (get_vector2_from_obj(interp, argv[1], pos) == TCL_ERROR)
+		if (get_vector2_from_obj(interp, argv[1], pos, "top-margin", "bottom-margin") == TCL_ERROR)
 			return TCL_ERROR;
 		ASSERT(wsetscrreg(win, pos[0], pos[1]) == OK);
 	}
