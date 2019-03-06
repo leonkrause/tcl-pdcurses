@@ -328,6 +328,21 @@ static int pdc_doupdate(
 	return TCL_OK;
 }
 
+static int pdc_flushinp(
+	UNUSED ClientData clientData,
+	Tcl_Interp* interp,
+	int objc,
+	Tcl_Obj* const objv[])
+{
+	if (objc != 1)
+	{
+		Tcl_WrongNumArgs(interp, 1, objv, NULL);
+		return TCL_ERROR;
+	}
+	ASSERT(flushinp() == OK);
+	return TCL_OK;
+}
+
 static int pdc_opt(
 	UNUSED ClientData clientData,
 	Tcl_Interp* interp,
@@ -416,6 +431,7 @@ PUBLIC int Tclpdc_Init(Tcl_Interp *interp)
 	Tcl_CreateObjCommand(interp, "pdc::beep", pdc_beep, NULL, NULL);
 	Tcl_CreateObjCommand(interp, "pdc::flash", pdc_flash, NULL, NULL);
 	Tcl_CreateObjCommand(interp, "pdc::doupdate", pdc_doupdate, NULL, NULL);
+	Tcl_CreateObjCommand(interp, "pdc::flushinp", pdc_flushinp, NULL, NULL);
 	Tcl_CreateObjCommand(interp, "pdc::opt", pdc_opt, NULL, NULL);
 
 	Tcl_Object pdc_stdscr = Tcl_NewObjectInstance(interp, pdc_window, "pdc::stdscr", NULL, 0, NULL, 0);
