@@ -205,6 +205,52 @@ TCL_METHOD_DEF(window, refresh,
 	return TCL_OK;
 }
 
+TCL_METHOD_DEF(window, getyx,
+	UNUSED ClientData clientData,
+	Tcl_Interp* interp,
+	Tcl_ObjectContext context,
+	int objc,
+	Tcl_Obj* const objv[])
+{
+	WINDOW* win = Tcl_ObjectGetMetadata(Tcl_ObjectContextObject(context), &pdc_window_meta);
+	int position[2];
+
+	int skipped_argc = Tcl_ObjectContextSkippedArgs(context);
+	int argc = objc - skipped_argc;
+	Tcl_Obj* const* argv = objv + skipped_argc;
+
+	if (argc == 0)
+		getyx(win, position[0], position[1]);
+	else if (argc == 1)
+	{
+		const char* opt = Tcl_GetString(argv[0]);
+		if (Tcl_StringMatch(opt, "-par"))
+			getparyx(win, position[0], position[1]);
+		else if (Tcl_StringMatch(opt, "-beg"))
+			getbegyx(win, position[0], position[1]);
+		else if (Tcl_StringMatch(opt, "-max"))
+			getmaxyx(win, position[0], position[1]);
+		else
+		{
+			Tcl_SetObjResult(interp, Tcl_Format(interp, "bad option \"%s\": must be -par, -beg or -max", 1, argv));
+			return TCL_ERROR;
+		}
+	}
+	else if (argc > 1)
+	{
+		Tcl_WrongNumArgs(interp, skipped_argc, objv, "?option?");
+		return TCL_ERROR;
+	}
+
+	Tcl_Obj* position_objs[2];
+	for (int i = 0; i < 2; ++i)
+	{
+		position_objs[i] = Tcl_NewIntObj(position[i]);
+	}
+	Tcl_SetObjResult(interp, Tcl_NewListObj(2, position_objs));
+	return TCL_OK;
+}
+
 TCL_METHOD_DEF(window, opt,
 	UNUSED ClientData clientData,
 	Tcl_Interp* interp,
@@ -427,6 +473,7 @@ PUBLIC int Tclpdc_Init(Tcl_Interp *interp)
 	Tcl_NewMethod(interp, pdc_window, Tcl_NewStringObj("getch", -1), 1, &TCL_METHODTYPE(window, getch), NULL);
 	Tcl_NewMethod(interp, pdc_window, Tcl_NewStringObj("move", -1), 1, &TCL_METHODTYPE(window, move), NULL);
 	Tcl_NewMethod(interp, pdc_window, Tcl_NewStringObj("refresh", -1), 1, &TCL_METHODTYPE(window, refresh), NULL);
+	Tcl_NewMethod(interp, pdc_window, Tcl_NewStringObj("getyx", -1), 1, &TCL_METHODTYPE(window, getyx), NULL);
 	Tcl_NewMethod(interp, pdc_window, Tcl_NewStringObj("opt", -1), 1, &TCL_METHODTYPE(window, opt), NULL);
 	Tcl_CreateObjCommand(interp, "pdc::beep", pdc_beep, NULL, NULL);
 	Tcl_CreateObjCommand(interp, "pdc::flash", pdc_flash, NULL, NULL);
