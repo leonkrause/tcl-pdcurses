@@ -143,6 +143,32 @@ TCL_METHOD_DEF(window, getch,
 	return TCL_OK;
 }
 
+TCL_METHOD_DEF(window, move,
+	UNUSED ClientData clientData,
+	Tcl_Interp* interp,
+	Tcl_ObjectContext context,
+	int objc,
+	Tcl_Obj* const objv[])
+{
+	WINDOW* win = Tcl_ObjectGetMetadata(Tcl_ObjectContextObject(context), &pdc_window_meta);
+	int position[2];
+
+	int skipped_argc = Tcl_ObjectContextSkippedArgs(context);
+	int argc = objc - skipped_argc;
+	Tcl_Obj* const* argv = objv + skipped_argc;
+
+	if (argc != 1)
+	{
+		Tcl_WrongNumArgs(interp, skipped_argc, objv, "position");
+		return TCL_ERROR;
+	}
+	if (get_vector2_from_obj(interp, *argv, position, NULL, NULL) == TCL_ERROR)
+		return TCL_ERROR;
+
+	ASSERT(wmove(win, position[0], position[1]) == OK);
+	return TCL_OK;
+}
+
 TCL_METHOD_DEF(window, refresh,
 	UNUSED ClientData clientData,
 	Tcl_Interp* interp,
@@ -384,6 +410,7 @@ PUBLIC int Tclpdc_Init(Tcl_Interp *interp)
 
 	Tcl_NewMethod(interp, pdc_window, Tcl_NewStringObj("add", -1), 1, &TCL_METHODTYPE(window, add), NULL);
 	Tcl_NewMethod(interp, pdc_window, Tcl_NewStringObj("getch", -1), 1, &TCL_METHODTYPE(window, getch), NULL);
+	Tcl_NewMethod(interp, pdc_window, Tcl_NewStringObj("move", -1), 1, &TCL_METHODTYPE(window, move), NULL);
 	Tcl_NewMethod(interp, pdc_window, Tcl_NewStringObj("refresh", -1), 1, &TCL_METHODTYPE(window, refresh), NULL);
 	Tcl_NewMethod(interp, pdc_window, Tcl_NewStringObj("opt", -1), 1, &TCL_METHODTYPE(window, opt), NULL);
 	Tcl_CreateObjCommand(interp, "pdc::beep", pdc_beep, NULL, NULL);
