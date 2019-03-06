@@ -51,9 +51,9 @@ static int get_vector2_from_obj(
 		return TCL_ERROR;
 	if (len != 2)
 	{
-		if (!y_name)
+		if (y_name == NULL)
 			y_name = "y";
-		if (!x_name)
+		if (x_name == NULL)
 			x_name = "x";
 		Tcl_SetObjResult(interp, Tcl_ObjPrintf("invalid position: should be \"{%s %s}\"", y_name, x_name));
 		return TCL_ERROR;
@@ -365,7 +365,7 @@ PUBLIC int Tclpdc_Init(Tcl_Interp *interp)
 	}
 	printf("%s\n%s (%s)\n", curses_version(), termname(), longname());
 
-	if (!Tcl_InitStubs(interp, "8.6", 0) || !Tcl_OOInitStubs(interp))
+	if (Tcl_InitStubs(interp, "8.6", 0) == NULL || Tcl_OOInitStubs(interp) == NULL)
 		return TCL_ERROR;
 
 	Tcl_Class pdc_window;
